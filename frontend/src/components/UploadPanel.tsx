@@ -165,7 +165,7 @@ export function UploadPanel({ onUploadSuccess }: UploadPanelProps) {
             {message}
             {uploadState === "success" && (
               <p className="text-xs opacity-70 mt-0.5">
-                Ingestion runs in the background. Start Inngest dev server to process.
+                Ready to query — start asking questions.
               </p>
             )}
           </div>

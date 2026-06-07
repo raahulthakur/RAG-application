@@ -135,11 +135,17 @@ async def ingest_pdf(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, tmp)
         tmp_path = tmp.name
 
-    await inngest_client.send(inngest.Event(
-        name="rag/ingest_pdf",
-        data={"pdf_path": tmp_path, "source_id": file.filename},
-    ))
-    return {"status": "ingestion_started", "filename": file.filename}
+    try:
+        chunks = load_and_chunk_pdf(tmp_path)
+        vecs = embed_texts(chunks)
+        source_id = file.filename
+        ids = [str(uuid.uuid5(uuid.NAMESPACE_URL, f"{source_id}:{i}")) for i in range(len(chunks))]
+        payloads = [{"source": source_id, "text": chunks[i]} for i in range(len(chunks))]
+        QdrantStorage().upsert(ids, vecs, payloads)
+    finally:
+        os.unlink(tmp_path)
+
+    return {"status": "ingested", "filename": file.filename, "chunks": len(chunks)}
 
 
 @app.get("/api/documents")
