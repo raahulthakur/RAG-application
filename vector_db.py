@@ -1,10 +1,20 @@
+import os
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct
 
 
+def _make_client() -> QdrantClient:
+    url = os.getenv("QDRANT_URL")
+    api_key = os.getenv("QDRANT_API_KEY")
+    if url:
+        return QdrantClient(url=url, api_key=api_key)
+    return QdrantClient(path="./qdrant_storage")
+
+
 class QdrantStorage:
-    def __init__(self, path="./qdrant_storage", collection="docs", dim=1536):
-        self.client = QdrantClient(path=path)
+    def __init__(self, collection="docs", dim=1536):
+        self.client = _make_client()
         self.collection = collection
         if self.client.collection_exists(self.collection):
             info = self.client.get_collection(self.collection)
