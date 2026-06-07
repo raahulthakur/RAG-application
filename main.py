@@ -124,6 +124,7 @@ app.add_middleware(
 inngest.fast_api.serve(app, inngest_client, functions=[rag_ingest_pdf, rag_query_pdf_ai])
 
 
+@app.get("/health")
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
